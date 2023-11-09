@@ -1,6 +1,11 @@
+import io
 import sys
+import wave
+from io import BytesIO
 from typing import Union, Optional
+from speechkit import Session, SpeechSynthesis
 
+from pyaudio import PyAudio, paInt16
 from PyQt5.QtWidgets import QApplication, QMainWindow
 
 from design import Ui_MainWindow
@@ -9,6 +14,12 @@ import config
 
 
 class Calculator(QMainWindow):
+    oauth_token = "y0_AgAAAAA0ACvDAATuwQAAAADxeyLXKispk9SRR9e47bP-kqxd-HKe2fA"
+    catalog_id = "b1gchocvafu3ogkejftd"
+    record_status = False
+    session = Session.from_yandex_passport_oauth_token(oauth_token, catalog_id)
+    synthesizeAudio = SpeechSynthesis(session)
+
     def __init__(self):
         super(Calculator, self).__init__()
         self.ui = Ui_MainWindow()
@@ -21,6 +32,7 @@ class Calculator(QMainWindow):
         self.connect_digit_buttons()
         self.connect_math_operations()
         self.connect_other_buttons()
+        self.connect_voice_buttons()
 
         self.entry.textChanged.connect(self.adjust_entry_font_size)
         # self.temp.textChanged.connect(self.adjust_temp_font_size)
@@ -39,6 +51,9 @@ class Calculator(QMainWindow):
         self.ui.btn_point.clicked.connect(self.add_point)
         self.ui.btn_neg.clicked.connect(self.negate)
         self.ui.btn_percent.clicked.connect(self.percent)
+
+    def connect_voice_buttons(self) -> None:
+        self.ui.btn_record.clicked.connect(self.record)
 
     def add_digit(self) -> None:
         self.remove_error()
@@ -227,6 +242,57 @@ class Calculator(QMainWindow):
                 break
 
             self.temp.setStyleSheet(f'font-size: {font_size}pt; color: #888;')
+
+    def record(self) -> None:
+        self.record_status = not self.record_status
+        if self.record_status:
+            self.ui.btn_record.setText("Подсчёт")
+            self.record_and_recognize()
+            self.ui.btn_record.setText("Запись")
+            self.record_status = not self.record_status
+        else:
+            return
+
+    def record_and_recognize(self) -> None:
+        data = self.record_audio()
+
+        # Отправляем на распознавание
+        text = self.recognizeShortAudio.recognize(
+            data, format='lpcm', sampleRateHertz=config.sample_rate)
+        print(text)
+
+    @staticmethod
+    def record_audio() -> BytesIO:
+        """
+        Записывает аудио данной продолжительности и возвращает бинарный объект с данными
+        """
+
+        p = PyAudio()
+        stream = p.open(
+            format=paInt16,
+            channels=config.num_channels,
+            rate=config.sample_rate,
+            input=True,
+            frames_per_buffer=config.chunk_size
+        )
+        frames = []
+        try:
+            for i in range(0, int(config.sample_rate / config.chunk_size * config.seconds)):
+                data = stream.read(config.chunk_size)
+                frames.append(data)
+        finally:
+            stream.stop_stream()
+            stream.close()
+            p.terminate()
+
+        container = io.BytesIO()
+        wf = wave.open(container, 'wb')
+        wf.setnchannels(config.num_channels)
+        wf.setsampwidth(p.get_sample_size(paInt16))
+        wf.setframerate(config.sample_rate)
+        wf.writeframes(b''.join(frames))
+        container.seek(0)
+        return container
 
     def resizeEvent(self, event) -> None:
         self.adjust_entry_font_size()

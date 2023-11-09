@@ -19,3 +19,9 @@ OPERATIONS = {
     '×': mul,
     '/': truediv
 }
+
+# константы для записи аудио
+seconds = 3
+sample_rate = 16000
+chunk_size = 4000
+num_channels = 1

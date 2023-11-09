@@ -428,25 +428,7 @@ class Ui_MainWindow(object):
 "    border-radius: 37;\n"
 "}")
         self.btn_record.setObjectName("btn_record")
-        self.layout_buttons.addWidget(self.btn_record, 6, 0, 1, 2)
-        self.btn_result = QtWidgets.QPushButton(self.centralwidget)
-        self.btn_result.setEnabled(True)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.btn_result.sizePolicy().hasHeightForWidth())
-        self.btn_result.setSizePolicy(sizePolicy)
-        self.btn_result.setStyleSheet("QWidget {\n"
-"    color: white;\n"
-"    background-color: #343434;\n"
-"    font-family: Rubik;\n"
-"    font-size: 20pt;\n"
-"    font-weight: 500;\n"
-"    border-radius: 37;\n"
-"}")
-        self.btn_result.setCheckable(False)
-        self.btn_result.setObjectName("btn_result")
-        self.layout_buttons.addWidget(self.btn_result, 6, 2, 1, 2)
+        self.layout_buttons.addWidget(self.btn_record, 6, 0, 1, 4)
         self.verticalLayout.addLayout(self.layout_buttons)
         MainWindow.setCentralWidget(self.centralwidget)
 
@@ -492,5 +474,4 @@ class Ui_MainWindow(object):
         self.btn_calc.setShortcut(_translate("MainWindow", "="))
         self.btn_add.setText(_translate("MainWindow", "+"))
         self.btn_add.setShortcut(_translate("MainWindow", "+"))
-        self.btn_record.setText(_translate("MainWindow", "Записать"))
-        self.btn_result.setText(_translate("MainWindow", "Посчитать"))
+        self.btn_record.setText(_translate("MainWindow", "Запись"))
